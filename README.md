@@ -2,7 +2,7 @@
 
 > AI-powered code understanding platform for developers and learners.
 
-Live at → **[adarshsalukhe.github.io/DeepCode](https://adarshsalukhe.github.io/DeepCode/)**
+Live at → **[adarshsalukhe.github.io/DeepCode/](https://adarshsalukhe.github.io/DeepCode/)**
 
 ---
 
