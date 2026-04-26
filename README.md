@@ -1,114 +1,173 @@
-# DeepCode Tutor
+# DeepCode
 
-AI-powered code understanding engine. Paste any code, get a deep explanation at your level.
-Powered by **Llama 3.3 70B** via Groq (free, ~0.5s response).
+> AI-powered code understanding platform for developers and learners.
+
+Live at → **[adarshsalukhe.github.io/DeepCode](https://adarshsalukhe.github.io/DeepCode)**
+
+---
+
+## What It Does
+
+Paste any code and get instant AI-powered analysis — powered by **GPT-OSS 120B** via Groq.
+
+| Mode | Description |
+|---|---|
+| **Understand** | Line-by-line explanation at beginner, intermediate, or expert level |
+| **Debug** | Root cause analysis with mechanical explanation and fix |
+| **Complexity** | Time and space complexity with Big O breakdown |
+| **Bug Finder** | Proactive bug detection — no error message needed |
+| **Challenge** | Mixed quiz — MCQ, complete the function, write a test |
+
+---
+
+## Supported Languages
+
+Python · JavaScript · TypeScript · Rust · Go · C++ · C · Ruby · HTML · SQL
 
 ---
 
 ## Features
 
-- **Understand mode** — explains any code at beginner / intermediate / expert level with streaming output
-- **Debug mode** — root cause analysis, not just a fix
-- **Challenge mode** — fresh AI-generated quiz questions every time, based on YOUR code
+- 🔐 Google and GitHub OAuth via Supabase
+- ⚡ Streaming responses — results appear token by token
+- 📊 Usage tracking — see who used what in Supabase dashboard
+- 🕐 History panel — revisit your last 20 analyses
+- 🛡️ Rate limiting, input validation, CORS protection
+- 📏 Explanation length control — Short / Medium / Detailed
 
 ---
 
-## Stack
+## Tech Stack
 
-| Layer     | Tech                              |
-|-----------|-----------------------------------|
-| LLM       | Llama 3.3 70B via Groq (free)     |
-| Local dev | Ollama + DeepSeek Coder 6.7B      |
-| Backend   | FastAPI + SSE streaming           |
-| Parser    | Python AST + regex chunker        |
-| Sandbox   | Python subprocess (safe)          |
-| Frontend  | React + Monaco Editor             |
+| Layer | Technology |
+|---|---|
+| LLM | GPT-OSS 120B via Groq API |
+| Backend | FastAPI + Python |
+| Auth & DB | Supabase |
+| Frontend | Vanilla React (single HTML file) |
+| Streaming | Server-Sent Events (SSE) |
+| Hosting | Railway (backend) + GitHub Pages (frontend) |
 
 ---
 
-## Setup — Day 1 (takes ~10 minutes)
+## Local Development
 
-### 1. Get a free Groq API key
-Go to https://console.groq.com → sign up → create API key → copy it
+### Prerequisites
+- Python 3.11+
+- Groq API key — [console.groq.com](https://console.groq.com)
+- Supabase project — [supabase.com](https://supabase.com)
 
-### 2. Backend
+### Backend
 
 ```bash
 cd backend
 pip install -r requirements.txt
-
-# Add your key
-cp .env .env.local
-# Edit .env and paste your GROQ_API_KEY
-
-uvicorn main:app --reload --port 8000
 ```
 
-Visit http://localhost:8000/health — should return `{"status":"ok"}`
+Create `backend/.env`:
+```env
+LLM_PROVIDER=groq
+GROQ_API_KEY=your_groq_api_key
 
-### 3. Frontend
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your_service_role_key
+
+ALLOWED_ORIGINS=*
+RATE_LIMIT_REQUESTS=10
+RATE_LIMIT_WINDOW=60
+```
+
+Start backend:
+```bash
+python -m uvicorn main:app --reload --port 8000
+```
+
+### Frontend
 
 ```bash
-cd frontend
-npm install
-npm start
+cd frontend/public
+python -m http.server 3000
 ```
 
-App opens at http://localhost:3000
+Open `http://localhost:3000`
 
 ---
 
-## Switch to fully local (no API key)
+## Supabase Setup
 
-```bash
-# Install Ollama
-curl -fsSL https://ollama.ai/install.sh | sh
+Run this SQL in your Supabase SQL editor:
 
-# Pull a code model
-ollama pull deepseek-coder:6.7b
+```sql
+create table usage_logs (
+  id          uuid default gen_random_uuid() primary key,
+  user_id     uuid references auth.users(id),
+  user_email  text,
+  mode        text,
+  language    text,
+  level       text,
+  code_length int,
+  created_at  timestamptz default now()
+);
 
-# In backend/.env
-LLM_PROVIDER=ollama
+create table user_logins (
+  id           uuid default gen_random_uuid() primary key,
+  user_id      uuid references auth.users(id),
+  user_email   text,
+  provider     text,
+  logged_in_at timestamptz default now()
+);
+
+alter table usage_logs enable row level security;
+alter table user_logins enable row level security;
+
+create policy "insert own usage" on usage_logs
+  for insert with check (auth.uid() = user_id);
+
+create policy "insert own login" on user_logins
+  for insert with check (auth.uid() = user_id);
 ```
-
-No internet required, zero cost. Slightly slower than Groq.
 
 ---
 
-## Project structure
+## Project Structure
 
 ```
-deepcode-tutor/
+DeepCode/
 ├── backend/
-│   ├── main.py                  # FastAPI app
+│   ├── main.py                  # FastAPI app + security middleware
+│   ├── requirements.txt
 │   ├── routes/
-│   │   ├── explain.py           # SSE streaming explanation
-│   │   ├── debug.py             # SSE streaming debug
-│   │   └── challenge.py        # Quiz generation endpoint
-│   ├── services/
-│   │   ├── llm.py               # Groq / Ollama switcher
-│   │   ├── parser.py            # AST + regex code chunker
-│   │   ├── sandbox.py           # Safe Python execution
-│   │   └── prompts.py           # All LLM prompt templates
-│   └── requirements.txt
+│   │   ├── explain.py           # Understand mode
+│   │   ├── debug.py             # Debug mode
+│   │   ├── challenge.py         # Challenge mode
+│   │   └── analyze.py           # Complexity + Bug Finder
+│   └── services/
+│       ├── llm.py               # Multi-provider LLM client
+│       ├── prompts.py           # All prompt templates
+│       ├── parser.py            # AST code parser
+│       ├── sandbox.py           # Python code executor
+│       ├── stream_utils.py      # SSE streaming utilities
+│       └── auth.py              # Supabase JWT verification
 └── frontend/
-    └── src/
-        ├── App.jsx
-        ├── hooks/
-        │   ├── useStream.js      # SSE streaming hook
-        │   └── useChallenge.js   # Quiz fetch hook
-        └── components/
-            ├── Header.jsx
-            ├── EditorPanel.jsx   # Left: code editor
-            ├── ExplainPanel.jsx  # Right: streaming output
-            └── ChallengePanel.jsx # Right: dynamic quiz
+    └── public/
+        └── index.html           # Entire frontend — single file
 ```
 
 ---
 
-## Week 2 improvements (after Day 7)
+## Security
 
-- Swap `<textarea>` for Monaco Editor (`@monaco-editor/react`)
-- Add shareable permalink per code snippet
-- Deploy backend to Railway, frontend to Vercel
-- Record demo video with a real algorithm (merge sort, Dijkstra)
+- JWT verification on every API route via Supabase
+- Rate limiting — 10 requests per minute per IP
+- Input validation — code length, language whitelist, field checks
+- CORS locked to frontend domain in production
+- API docs disabled in production
+- Secrets never in frontend code
+
+---
+
+## Built By
+
+**Adarsh Salukhe** — AI/LLM Engineer
+
+[GitHub](https://github.com/AdarshSalukhe) · [LinkedIn](https://linkedin.com/in/adarshsalukhe)
