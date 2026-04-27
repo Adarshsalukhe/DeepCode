@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DeepCode Tutor</title>
+  <title>DeepCode</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.js"></script>
@@ -332,8 +332,8 @@
 const { useState, useRef, useEffect } = React;
 // ── Supabase config ───────────────────────────────────────────────────────────
 // Replace these with your actual Supabase project values
-const SUPABASE_URL  = "https://your-project.supabase.co";
-const SUPABASE_ANON = "your-anon-key-here";
+const SUPABASE_URL  = "https://yvtpcwmwgzifyoclrkth.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2dHBjd213Z3ppZnlvY2xya3RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjkzMTMsImV4cCI6MjA5MjIwNTMxM30.8S6o0gzIL1Xu4i2l0XYuNs9tR1ztjxR_Ufz8YcgSspM";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 const API = "http://localhost:8000";
@@ -913,7 +913,7 @@ function LoginScreen({ onLogin }) {
               <path d="M2 4l-2 3 2 3M12 4l2 3-2 3M9 1L5 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="login-logo-text">DeepCode Tutor</span>
+          <span className="login-logo-text">DeepCode</span>
         </div>
         <p className="login-tagline">Understand any code, line by line.<br/>Sign in to get started.</p>
 
@@ -1144,7 +1144,7 @@ function App() {
                 <path d="M2 4l-2 3 2 3M12 4l2 3-2 3M9 1L5 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <span className="logo-text">DeepCode Tutor</span>
+            <span className="logo-text">DeepCode</span>
           </div>
           <nav className="mode-tabs">
             {MODES.map(m=><button key={m.id} className={`mode-tab${mode===m.id?' active':''}`} onClick={()=>changeMode(m.id)}>{m.label}</button>)}
