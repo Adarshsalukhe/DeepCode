@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DeepCode</title>
+  <title>DeepCode Tutor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.js"></script>
@@ -44,7 +44,7 @@
     ::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px; }
     textarea, input, button { font-family: var(--font-sans); }
     textarea { resize: none; }
-    #root { height: 100vh; display: flex; flex-direction: column; }
+    #root { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
     /* Header */
     .header { height: 48px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: var(--white); flex-shrink: 0; }
@@ -248,6 +248,76 @@
 
     .history-btn { display:flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--gray-500);font-size:12px;cursor:pointer;font-family:var(--font-sans);transition:all 0.15s; }
     .history-btn:hover { border-color:var(--gray-400);color:var(--text); }
+
+    /* ── Mobile Responsive ─────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      /* Header */
+      .header { padding: 0 12px; height: auto; min-height: 48px; flex-wrap: wrap; gap: 6px; padding-top: 8px; padding-bottom: 8px; }
+      .logo-text { font-size: 12px; }
+      .mode-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; padding-bottom: 2px; }
+      .mode-tab { padding: 4px 10px; font-size: 12px; }
+      .badge { display: none; }
+      .user-email { display: none; }
+      .history-btn span:last-child { display: none; }
+
+      /* Workspace — stack vertically on mobile */
+      .workspace { flex-direction: column; height: auto; overflow: visible; }
+
+      /* Editor side — full width */
+      .editor-side { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 45vh; }
+
+      /* Output side — full width */
+      .output-side { width: 100%; min-height: 50vh; }
+
+      /* Toolbar */
+      .toolbar { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; padding: 8px 10px; gap: 6px; }
+      .chip { font-size: 11px; padding: 3px 8px; }
+      .level-chip { font-size: 11px; padding: 3px 8px; }
+      .length-btn { font-size: 10px; padding: 2px 6px; }
+
+      /* Code editor */
+      .code-textarea { font-size: 12px; padding: 12px 10px 12px 10px; }
+      .line-nums { width: 32px; }
+      .line-num { font-size: 10px; padding-right: 6px; }
+
+      /* Action button */
+      .action-bar { padding: 10px 12px; }
+      .run-btn { font-size: 12px; padding: 10px; }
+
+      /* Output panel */
+      .output-body { padding: 14px 14px 20px; }
+      .output-header { padding: 8px 12px; }
+
+      /* Language dropdown */
+      .lang-dropdown-menu { min-width: 140px; }
+
+      /* History panel — full screen on mobile */
+      .history-panel { width: 100%; top: 0; left: 0; right: 0; bottom: 0; z-index: 300; }
+
+      /* Challenge */
+      .challenge-body { padding: 14px; }
+      .question-heading { font-size: 15px; }
+
+      /* Login screen */
+      .login-card { padding: 28px 20px; }
+      .login-logo-text { font-size: 16px; }
+
+      /* Footer */
+      .output-footer { padding: 6px 12px; gap: 4px; }
+      .tag { font-size: 9.5px; padding: 1px 5px; }
+
+      /* App height on mobile */
+      #root { height: auto; min-height: 100vh; }
+    }
+
+    @media (max-width: 480px) {
+      .mode-tab { padding: 4px 8px; font-size: 11px; }
+      .editor-side { max-height: 40vh; }
+      .output-side { min-height: 55vh; }
+      .md-p { font-size: 13px; }
+      .md-annot-code { font-size: 11px; }
+      .md-annot-text { font-size: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -256,11 +326,11 @@
 const { useState, useRef, useEffect } = React;
 // ── Supabase config ───────────────────────────────────────────────────────────
 // Replace these with your actual Supabase project values
-const SUPABASE_URL  = "https://yvtpcwmwgzifyoclrkth.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2dHBjd213Z3ppZnlvY2xya3RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjkzMTMsImV4cCI6MjA5MjIwNTMxM30.8S6o0gzIL1Xu4i2l0XYuNs9tR1ztjxR_Ufz8YcgSspM";
+const SUPABASE_URL  = "https://your-project.supabase.co";
+const SUPABASE_ANON = "your-anon-key-here";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const API = "https://deepcode.up.railway.app";
+const API = "http://localhost:8000";
 
 const SAMPLES = {
   python: `def binary_search(arr, target):
@@ -450,6 +520,76 @@ puts bubble_sort([64, 34, 25, 12, 22, 11, 90]).inspect`,
 
     .history-btn { display:flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--gray-500);font-size:12px;cursor:pointer;font-family:var(--font-sans);transition:all 0.15s; }
     .history-btn:hover { border-color:var(--gray-400);color:var(--text); }
+
+    /* ── Mobile Responsive ─────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      /* Header */
+      .header { padding: 0 12px; height: auto; min-height: 48px; flex-wrap: wrap; gap: 6px; padding-top: 8px; padding-bottom: 8px; }
+      .logo-text { font-size: 12px; }
+      .mode-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; padding-bottom: 2px; }
+      .mode-tab { padding: 4px 10px; font-size: 12px; }
+      .badge { display: none; }
+      .user-email { display: none; }
+      .history-btn span:last-child { display: none; }
+
+      /* Workspace — stack vertically on mobile */
+      .workspace { flex-direction: column; height: auto; overflow: visible; }
+
+      /* Editor side — full width */
+      .editor-side { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 45vh; }
+
+      /* Output side — full width */
+      .output-side { width: 100%; min-height: 50vh; }
+
+      /* Toolbar */
+      .toolbar { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; padding: 8px 10px; gap: 6px; }
+      .chip { font-size: 11px; padding: 3px 8px; }
+      .level-chip { font-size: 11px; padding: 3px 8px; }
+      .length-btn { font-size: 10px; padding: 2px 6px; }
+
+      /* Code editor */
+      .code-textarea { font-size: 12px; padding: 12px 10px 12px 10px; }
+      .line-nums { width: 32px; }
+      .line-num { font-size: 10px; padding-right: 6px; }
+
+      /* Action button */
+      .action-bar { padding: 10px 12px; }
+      .run-btn { font-size: 12px; padding: 10px; }
+
+      /* Output panel */
+      .output-body { padding: 14px 14px 20px; }
+      .output-header { padding: 8px 12px; }
+
+      /* Language dropdown */
+      .lang-dropdown-menu { min-width: 140px; }
+
+      /* History panel — full screen on mobile */
+      .history-panel { width: 100%; top: 0; left: 0; right: 0; bottom: 0; z-index: 300; }
+
+      /* Challenge */
+      .challenge-body { padding: 14px; }
+      .question-heading { font-size: 15px; }
+
+      /* Login screen */
+      .login-card { padding: 28px 20px; }
+      .login-logo-text { font-size: 16px; }
+
+      /* Footer */
+      .output-footer { padding: 6px 12px; gap: 4px; }
+      .tag { font-size: 9.5px; padding: 1px 5px; }
+
+      /* App height on mobile */
+      #root { height: auto; min-height: 100vh; }
+    }
+
+    @media (max-width: 480px) {
+      .mode-tab { padding: 4px 8px; font-size: 11px; }
+      .editor-side { max-height: 40vh; }
+      .output-side { min-height: 55vh; }
+      .md-p { font-size: 13px; }
+      .md-annot-code { font-size: 11px; }
+      .md-annot-text { font-size: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -761,7 +901,7 @@ function LoginScreen({ onLogin }) {
               <path d="M2 4l-2 3 2 3M12 4l2 3-2 3M9 1L5 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="login-logo-text">DeepCode</span>
+          <span className="login-logo-text">DeepCode Tutor</span>
         </div>
         <p className="login-tagline">Understand any code, line by line.<br/>Sign in to get started.</p>
 
@@ -982,7 +1122,7 @@ function App() {
   const lines = code.split('\n');
 
   return (
-    <div style={{height:'100vh',display:'flex',flexDirection:'column'}} >
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}} >
       {/* Header */}
       <header className="header">
         <div className="header-left">
@@ -992,7 +1132,7 @@ function App() {
                 <path d="M2 4l-2 3 2 3M12 4l2 3-2 3M9 1L5 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <span className="logo-text">DeepCode</span>
+            <span className="logo-text">DeepCode Tutor</span>
           </div>
           <nav className="mode-tabs">
             {MODES.map(m=><button key={m.id} className={`mode-tab${mode===m.id?' active':''}`} onClick={()=>changeMode(m.id)}>{m.label}</button>)}
